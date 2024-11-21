@@ -1,1 +1,3 @@
-# sport-matchmaking-google-calendar-service
+# Sport Matchmaking - Google Calendar Service
+
+Google Calendar Service API for Sport Matchmaking.
