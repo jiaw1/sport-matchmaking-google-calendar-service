@@ -1,6 +1,6 @@
 module github.com/jiaw1/sport-matchmaking-google-calendar-service
 
-go 1.23.3
+go 1.23
 
 require (
 	github.com/Nerzal/gocloak/v13 v13.9.0
