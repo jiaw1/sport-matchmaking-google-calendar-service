@@ -1,10 +1,10 @@
 package handler
 
 import (
-	"html/template"
 	"log/slog"
 	"net/http"
 	"strings"
+	"text/template"
 	"time"
 
 	"github.com/jiaw1/sport-matchmaking-google-calendar-service/model"
@@ -39,7 +39,8 @@ func (h *Handler) CreateCalendarEvent(c echo.Context) error {
 	}
 
 	// Insert event into Google Calendar
-	createdEvent, err := h.calendarService.Events.Insert("primary", event).Do()
+	createdEvent, err := h.calendarService.Events.Insert("e4b3894afa61d429a631de599d1f320c9a18a7cc647542abbcbdac0cb304bded@group.calendar.google.com", event).Do()
+
 	if err != nil {
 		slog.Error("failed to create calendar event", slog.String("error", err.Error()))
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create calendar event")
@@ -75,7 +76,8 @@ func (h *Handler) UpdateCalendarEvent(c echo.Context) error {
 		},
 	}
 
-	updatedEvent, err := h.calendarService.Events.Update("primary", eventID, event).Do()
+	updatedEvent, err := h.calendarService.Events.Update("e4b3894afa61d429a631de599d1f320c9a18a7cc647542abbcbdac0cb304bded@group.calendar.google.com", eventID, event).Do()
+
 	if err != nil {
 		slog.Error("failed to update calendar event", slog.String("error", err.Error()))
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to update calendar event")
@@ -88,7 +90,7 @@ func (h *Handler) DeleteCalendarEvent(c echo.Context) error {
 	eventID := c.Param("id") // Fetch event ID from URL parameter
 
 	// Delete event from Google Calendar
-	err := h.calendarService.Events.Delete("primary", eventID).Do()
+	err := h.calendarService.Events.Delete("e4b3894afa61d429a631de599d1f320c9a18a7cc647542abbcbdac0cb304bded@group.calendar.google.com", eventID).Do()
 	if err != nil {
 		slog.Error("failed to delete calendar event", slog.String("error", err.Error()))
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to delete calendar event")
