@@ -1,8 +1,10 @@
 package handler
 
 import (
+	"html/template"
 	"log/slog"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/jiaw1/sport-matchmaking-google-calendar-service/model"
@@ -114,17 +116,42 @@ func (h *Handler) GetCalendarEvents(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to fetch calendar events: "+err.Error())
 	}
 
-	// Generate HTML response to display events in a browser
-	html := "<html><body><h1>Google Calendar Events</h1><ul>"
-	for _, event := range events.Items {
-		html += "<li><strong>" + event.Summary + "</strong><br>" +
-			"Description: " + event.Description + "<br>" +
-			"Location: " + event.Location + "<br>" +
-			"Start: " + event.Start.DateTime + "<br>" +
-			"End: " + event.End.DateTime + "<br>" +
-			"<a href='" + event.HtmlLink + "' target='_blank'>View in Google Calendar</a></li><br>"
-	}
-	html += "</ul></body></html>"
+	// Define HTML template with placeholders for event data
+	const tmpl = `
+	<!DOCTYPE html>
+	<html>
+		<head><title>Google Calendar Events</title></head>
+		<body>
+			<h1>Google Calendar Events</h1>
+			<ul>
+				{{ range . }}
+					<li>
+						<strong>{{ .Summary }}</strong><br>
+						Description: {{ .Description }}<br>
+						Location: {{ .Location }}<br>
+						Start: {{ .Start.DateTime }}<br>
+						End: {{ .End.DateTime }}<br>
+						<a href="{{ .HtmlLink }}" target="_blank">View in Google Calendar</a>
+					</li>
+				{{ end }}
+			</ul>
+		</body>
+	</html>`
 
-	return c.HTML(http.StatusOK, html)
+	// Compile the template
+	t, err := template.New("events").Parse(tmpl)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to parse HTML template: "+err.Error())
+	}
+
+	// Render the template to a string (using a buffer)
+	var htmlContent strings.Builder
+	err = t.Execute(&htmlContent, events.Items)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to render HTML template: "+err.Error())
+	}
+
+	// Return the generated HTML
+	c.Response().Header().Set("Content-Type", "text/html; charset=utf-8")
+	return c.HTML(http.StatusOK, htmlContent.String())
 }
